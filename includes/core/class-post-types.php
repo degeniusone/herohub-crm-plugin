@@ -13,7 +13,7 @@ class Post_Types {
     private function register_contact_post_type() {
         $labels = array(
             'name'               => __('Contacts', 'herohub-crm'),
-            'singular_name'      => __('Contact', 'herohub-crm'),
+            'singular_name'      => __('Contact', 'herohub-crm'), 
             'menu_name'          => __('Contacts', 'herohub-crm'),
             'add_new'            => __('Add New Contact', 'herohub-crm'),
             'add_new_item'       => __('Add New Contact', 'herohub-crm'),
@@ -37,7 +37,7 @@ class Post_Types {
             'hierarchical'       => false,
             'menu_position'      => 5,
             'menu_icon'          => 'dashicons-businessperson',
-            'supports'           => array('title', 'editor', 'thumbnail', 'custom-fields'),
+            'supports'           => array('title', 'thumbnail', 'custom-fields'),
         );
 
         register_post_type('contact', $args);

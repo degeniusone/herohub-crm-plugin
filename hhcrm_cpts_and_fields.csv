@@ -1,0 +1,39 @@
+CPT,Field Name,Field Type,Options
+hhcrm_contact,First Name,Text,
+hhcrm_contact,Last Name,Text,
+hhcrm_contact,Interest,Select,"Buy, Sell, Rent, Invest, Commercial"
+hhcrm_contact,Nationality,Text,
+hhcrm_contact,Email,Email,
+hhcrm_contact,Phone,Text,
+hhcrm_contact,Property Type,Select,"Villa, Apartment, Townhouse, Offplan"
+hhcrm_contact,Area,Text,
+hhcrm_contact,City,Text,
+hhcrm_contact,Project/Building,Text,
+hhcrm_contact,Purchased Price,Number,
+hhcrm_contact,Purchased Date,Date,
+hhcrm_contact,Beds,Number,
+hhcrm_contact,Bath,Number,
+hhcrm_contact,Property Size,Number,
+hhcrm_activity,Related Contact,Post Object,hhcrm_contact
+hhcrm_activity,Interaction Type,Select,"Cold Call, Follow-Up, Scheduled Call, Meeting, Email"
+hhcrm_activity,Date and Time,DateTime,
+hhcrm_activity,Notes,Textarea,
+hhcrm_activity,Status,Taxonomy,hhcrm_status
+hhcrm_calendar_event,Event Type,Select,"Call, Meeting, Follow-Up"
+hhcrm_calendar_event,Related Contact,Post Object,hhcrm_contact
+hhcrm_calendar_event,Related Agent,User,
+hhcrm_calendar_event,Date and Time,DateTime,
+hhcrm_deal,Related Contact,Post Object,hhcrm_contact
+hhcrm_deal,Related Property,Post Object,hhcrm_property
+hhcrm_deal,Deal Type,Select,"Buying, Selling, Renting"
+hhcrm_deal,Asking Price,Number,
+hhcrm_deal,Status,Taxonomy,hhcrm_status
+hhcrm_deal,Documents,File,
+hhcrm_property,Property Name,Text,
+hhcrm_property,Property Type,Taxonomy,hhcrm_property_type
+hhcrm_property,Area,Text,
+hhcrm_property,City,Text,
+hhcrm_property,Price,Number,
+hhcrm_property,Size,Number,
+hhcrm_property,Beds,Number,
+hhcrm_property,Baths,Number,

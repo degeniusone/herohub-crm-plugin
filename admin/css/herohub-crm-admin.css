@@ -2,6 +2,7 @@
 
 .herohub-crm-dashboard {
     margin-top: 20px;
+    padding: 20px;
 }
 
 .herohub-crm-stats-grid {
@@ -52,6 +53,61 @@
     border-bottom: 2px solid #eee;
 }
 
+.herohub-crm-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.herohub-crm-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.herohub-crm-card h3 {
+    margin: 0 0 10px;
+    color: #23282d;
+}
+
+.herohub-crm-card-number {
+    font-size: 36px;
+    font-weight: 600;
+    color: #0073aa;
+    margin: 10px 0;
+}
+
+.herohub-crm-recent {
+    display: grid;
+    gap: 30px;
+}
+
+.herohub-crm-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.herohub-crm-section h2 {
+    margin: 0 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.herohub-crm-table-wrapper {
+    overflow-x: auto;
+}
+
+.herohub-crm-table-wrapper table {
+    margin: 0;
+}
+
 /* Settings page styles */
 .form-table th {
     width: 200px;
@@ -63,10 +119,109 @@
     max-width: 100%;
 }
 
+/* Contact metabox styles */
+.herohub-metabox {
+    padding: 12px;
+}
+
+.herohub-metabox-section {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.herohub-metabox-section h3 {
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #23282d;
+}
+
+.herohub-metabox-section p {
+    margin: 0 0 15px;
+}
+
+.herohub-metabox-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.herohub-metabox input[type="text"],
+.herohub-metabox input[type="email"],
+.herohub-metabox input[type="number"],
+.herohub-metabox select,
+.herohub-metabox textarea {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.herohub-metabox select[multiple] {
+    height: auto;
+    min-height: 120px;
+}
+
+.herohub-address-group {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.herohub-address-group input {
+    width: 100%;
+}
+
+.herohub-property-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.herohub-property-specs .small-text {
+    width: 80px;
+}
+
+/* Assets repeater field styles */
+.herohub-assets-group .herohub-asset-row {
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    margin-bottom: 15px;
+    padding: 15px;
+    position: relative;
+}
+
+.herohub-assets-group .herohub-remove-asset-row {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #a00;
+}
+
+.herohub-assets-group .herohub-asset-fields p {
+    margin-bottom: 10px;
+}
+
+#herohub-add-asset-row {
+    margin-top: 15px;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 782px) {
     .herohub-crm-stats-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .herohub-crm-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .herohub-crm-card {
+        margin-bottom: 15px;
     }
     
     .form-table th {
@@ -76,5 +231,15 @@
     .form-table input[type="text"],
     .form-table input[type="email"] {
         width: 100%;
+    }
+    
+    .herohub-address-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (min-width: 783px) {
+    .herohub-property-specs {
+        grid-template-columns: repeat(3, 1fr);
     }
 }

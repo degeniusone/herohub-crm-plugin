@@ -1,0 +1,30 @@
+{
+    "name": "herohub/crm",
+    "description": "A robust CRM system for real estate professionals",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4",
+        "twilio/sdk": "^6.44"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "yoast/phpunit-polyfills": "^1.0",
+        "wp-coding-standards/wpcs": "^2.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "HeroHub\\CRM\\": "includes/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpcs": "phpcs --standard=WordPress"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

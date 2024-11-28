@@ -4,16 +4,28 @@ namespace HeroHub\CRM\Admin;
 class Admin {
     private $plugin_name;
     private $version;
+    private $meta_boxes;
 
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+        
+        // Initialize metaboxes
+        $this->meta_boxes = new Meta_Boxes();
     }
 
     public function enqueue_styles() {
         wp_enqueue_style(
             $this->plugin_name,
             HEROHUB_CRM_PLUGIN_URL . 'admin/css/herohub-crm-admin.css',
+            array(),
+            $this->version,
+            'all'
+        );
+
+        wp_enqueue_style(
+            $this->plugin_name . '-meta-boxes',
+            HEROHUB_CRM_PLUGIN_URL . 'admin/css/herohub-meta-boxes.css',
             array(),
             $this->version,
             'all'
@@ -60,6 +72,9 @@ class Admin {
         );
     }
 
+    /**
+     * Display the plugin dashboard page
+     */
     public function display_plugin_dashboard_page() {
         include_once HEROHUB_CRM_PLUGIN_DIR . 'admin/partials/herohub-crm-admin-dashboard.php';
     }

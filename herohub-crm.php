@@ -19,6 +19,7 @@ if (!defined('WPINC')) {
 define('HEROHUB_CRM_VERSION', '1.0.0');
 define('HEROHUB_CRM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HEROHUB_CRM_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('HEROHUB_CRM_FILE', __FILE__);
 
 // Autoload classes
 spl_autoload_register(function ($class) {

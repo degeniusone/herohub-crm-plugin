@@ -1,0 +1,156 @@
+/* HeroHub CRM Admin Styles */
+
+.herohub-dashboard {
+    margin: 20px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background: #fff;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dashboard-card h2 {
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e4e7;
+    font-size: 1.3em;
+    color: #1e1e1e;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.stat-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #646970;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+/* Activity List */
+.activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    display: inline-block;
+    font-size: 0.85em;
+    color: #646970;
+    margin-right: 10px;
+}
+
+.activity-text {
+    color: #1e1e1e;
+}
+
+/* Performance Stats */
+.performance-stats {
+    display: grid;
+    gap: 15px;
+}
+
+.performance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.performance-label {
+    color: #646970;
+}
+
+.performance-value {
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+/* Top Performers */
+.performers-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.performer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.performer-item:last-child {
+    border-bottom: none;
+}
+
+.performer-name {
+    font-weight: 500;
+    color: #1e1e1e;
+}
+
+.performer-stats {
+    display: flex;
+    gap: 15px;
+    color: #646970;
+    font-size: 0.9em;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performer-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .performer-stats {
+        margin-top: 5px;
+    }
+}
