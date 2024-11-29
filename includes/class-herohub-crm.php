@@ -1,113 +1,119 @@
 <?php
 namespace HeroHub\CRM;
 
-use HeroHub\CRM\Admin\Dashboard;
-use HeroHub\CRM\Admin\Settings;
-use HeroHub\CRM\Core\Lead_Scoring;
+// If this file is called directly, abort.
+if (!defined('WPINC')) {
+    die;
+}
+
 use HeroHub\CRM\Core\Post_Types;
 use HeroHub\CRM\Core\Taxonomies;
 use HeroHub\CRM\Core\Roles_Manager;
+use HeroHub\CRM\Core\Permissions_Manager;
+use HeroHub\CRM\Core\Property_Manager;
+use HeroHub\CRM\Core\SMS_Manager;
+use HeroHub\CRM\Core\Settings;
 use HeroHub\CRM\Admin\Meta_Boxes;
 use HeroHub\CRM\Loader;
-use HeroHub\CRM\Logger;
-use HeroHub\CRM\Ajax;
-use HeroHub\CRM\Exporter;
-use HeroHub\CRM\Admin\Admin;
 
 class HeroHub_CRM {
     protected $loader;
-    protected $plugin_name;
     protected $version;
     protected $post_types;
     protected $taxonomies;
+    protected $property_manager;
+    protected $roles_manager;
+    protected $permissions_manager;
+    protected $sms_manager;
+    protected $settings;
 
     public function __construct() {
         $this->version = HEROHUB_CRM_VERSION;
-        $this->plugin_name = 'herohub-crm';
-        
         $this->load_dependencies();
-        $this->includes();
-        $this->init();
-        $this->define_admin_hooks();
-        $this->define_public_hooks();
+        $this->init_components();
+        $this->define_hooks();
     }
 
     private function load_dependencies() {
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/class-herohub-crm-loader.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/core/class-post-types.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/core/class-taxonomies.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/admin/class-admin.php';
-        
-        $this->loader = new Loader();
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-herohub-crm-loader.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-installer.php';
+
+        // Load CPTs
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-property.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-deal.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-event.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-activity.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-contact.php';
+
+        // Load Core Classes
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-roles-manager.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-permissions-manager.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-sms-manager.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-settings.php';
+
+        // Load Admin Classes
+        if (is_admin()) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/admin/class-admin.php';
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/admin/class-settings.php';
+        }
+
+        $this->loader = new HeroHub\CRM\Loader();
     }
 
-    private function includes() {
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/class-installer.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/class-ajax.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/class-exporter.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/class-logger.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/trait-error-handler.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/admin/class-dashboard.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/admin/class-dashboard-functions.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/admin/class-settings.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/admin/class-contact-metabox.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/core/class-sms-manager.php';
-        require_once HEROHUB_CRM_PLUGIN_DIR . 'includes/core/class-lead-scoring.php';
-    }
-
-    public function init() {
-        // Initialize Logger
-        new Logger();
-        
-        // Initialize AJAX handler
-        new Ajax();
-        
-        // Initialize Settings
-        new Settings();
-        
-        // Initialize Exporter
-        new Exporter();
-        
-        // Initialize lead scoring
-        new Lead_Scoring();
+    private function init_components() {
+        // Initialize core components
+        $this->roles_manager = new Core\Roles_Manager();
+        $this->permissions_manager = new Core\Permissions_Manager();
+        $this->sms_manager = new Core\SMS_Manager();
+        $this->settings = new Core\Settings();
         
         // Initialize post types and taxonomies
         $this->post_types = new Post_Types();
         $this->taxonomies = new Taxonomies();
+        $this->property_manager = new Property_Manager();
         
         // Register activation hook
-        register_activation_hook(\HEROHUB_CRM_FILE, array('HeroHub\CRM\Installer', 'install'));
+        register_activation_hook(HEROHUB_CRM_FILE, array('HeroHub\CRM\Installer', 'install'));
+    }
+
+    private function define_cpt_hooks() {
+        // Initialize CPTs
+        new HeroHub\CRM\CPT\Property();
+        new HeroHub\CRM\CPT\Deal();
+        new HeroHub\CRM\CPT\Event();
+        new HeroHub\CRM\CPT\Activity();
+        new HeroHub\CRM\CPT\Contact();
+    }
+
+    private function define_admin_hooks() {
+        if (is_admin()) {
+            $admin = new Admin\Admin($this->version);
+            $meta_boxes = new Admin\Meta_Boxes();
+
+            $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_styles');
+            $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_scripts');
+        }
+    }
+
+    private function define_hooks() {
+        $this->define_cpt_hooks();
+        $this->define_admin_hooks();
         
-        // Register uninstall hook
-        register_uninstall_hook(\HEROHUB_CRM_FILE, array('HeroHub\CRM\Installer', 'uninstall'));
+        // Add core hooks
+        $this->loader->add_action('init', $this->roles_manager, 'register_roles');
+        $this->loader->add_action('init', $this->permissions_manager, 'register_post_type_capabilities');
+        $this->loader->add_filter('map_meta_cap', $this->permissions_manager, 'map_meta_caps', 10, 4);
         
-        // Register post types and taxonomies on init
+        // Register hooks
         add_action('init', array($this->post_types, 'register'));
         add_action('init', array($this->taxonomies, 'register'));
     }
 
-    private function define_admin_hooks() {
-        $admin = new Admin($this->get_plugin_name(), $this->get_version());
-        $meta_boxes = new Meta_Boxes();
-        
-        $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_styles');
-        $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_scripts');
-        $this->loader->add_action('admin_menu', $admin, 'add_plugin_admin_menu');
-    }
-
-    private function define_public_hooks() {
-        // Add public-facing hooks here if needed
-    }
-
-    public function get_plugin_name() {
-        return $this->plugin_name;
+    public function run() {
+        $this->loader->run();
     }
 
     public function get_version() {
         return $this->version;
-    }
-
-    public function run() {
-        $this->loader->run();
     }
 }
