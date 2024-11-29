@@ -26,6 +26,9 @@ class Contact {
         // Meta boxes
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_meta'));
+
+        // Initialize Select2 hooks
+        $this->init_select2_hooks();
     }
 
     /**
@@ -164,15 +167,20 @@ class Contact {
             'normal',
             'high'
         );
+    }
 
-        add_meta_box(
-            'contact_communication',
-            __('Communication Details', 'herohub-crm'),
-            array($this, 'render_communication_meta_box'),
-            'contact',
-            'normal',
-            'high'
-        );
+    /**
+     * Enqueue Select2 scripts and styles
+     */
+    public function enqueue_select2_scripts() {
+        // Enqueue Select2 CSS
+        wp_enqueue_style('select2-css', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+        
+        // Enqueue Select2 JS
+        wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', array('jquery'), '4.1.0', true);
+        
+        // Enqueue custom script to initialize Select2
+        wp_enqueue_script('herohub-select2-init', plugin_dir_url(__FILE__) . 'js/select2-init.js', array('select2-js'), '1.0.0', true);
     }
 
     /**
@@ -184,92 +192,154 @@ class Contact {
         // Get saved values
         $first_name = get_post_meta($post->ID, '_contact_first_name', true);
         $last_name = get_post_meta($post->ID, '_contact_last_name', true);
-        $company = get_post_meta($post->ID, '_contact_company', true);
-        $position = get_post_meta($post->ID, '_contact_position', true);
-        $nationality = get_post_meta($post->ID, '_contact_nationality', true);
-        $passport = get_post_meta($post->ID, '_contact_passport', true);
-
-        ?>
-        <div class="herohub-meta-box">
-            <div class="herohub-row">
-                <div class="herohub-field">
-                    <label for="contact_first_name"><?php _e('First Name', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_first_name" name="contact_first_name" value="<?php echo esc_attr($first_name); ?>">
-                </div>
-
-                <div class="herohub-field">
-                    <label for="contact_last_name"><?php _e('Last Name', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_last_name" name="contact_last_name" value="<?php echo esc_attr($last_name); ?>">
-                </div>
-
-                <div class="herohub-field">
-                    <label for="contact_company"><?php _e('Company', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_company" name="contact_company" value="<?php echo esc_attr($company); ?>">
-                </div>
-
-                <div class="herohub-field">
-                    <label for="contact_position"><?php _e('Position', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_position" name="contact_position" value="<?php echo esc_attr($position); ?>">
-                </div>
-
-                <div class="herohub-field">
-                    <label for="contact_nationality"><?php _e('Nationality', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_nationality" name="contact_nationality" value="<?php echo esc_attr($nationality); ?>">
-                </div>
-
-                <div class="herohub-field">
-                    <label for="contact_passport"><?php _e('Passport/ID Number', 'herohub-crm'); ?></label>
-                    <input type="text" id="contact_passport" name="contact_passport" value="<?php echo esc_attr($passport); ?>">
-                </div>
-            </div>
-        </div>
-        <?php
-    }
-
-    /**
-     * Render communication details meta box
-     */
-    public function render_communication_meta_box($post) {
-        // Get saved values
         $email = get_post_meta($post->ID, '_contact_email', true);
-        $phone = get_post_meta($post->ID, '_contact_phone', true);
-        $mobile = get_post_meta($post->ID, '_contact_mobile', true);
-        $address = get_post_meta($post->ID, '_contact_address', true);
-        $preferred_contact = get_post_meta($post->ID, '_contact_preferred_contact', true);
+        $nationality = get_post_meta($post->ID, '_contact_nationality', true);
+        $mobile_phone = get_post_meta($post->ID, '_contact_mobile_phone', true);
+        $whatsapp = get_post_meta($post->ID, '_contact_whatsapp', true);
+        $interest = get_post_meta($post->ID, '_contact_interest', true);
+        $source = get_post_meta($post->ID, '_contact_source', true);
+
+        // Full list of nationalities
+        $nationalities = [
+            'Afghan', 'Algerian', 'American', 'Angolan', 'Argentine', 'Armenian', 
+            'Australian', 'Austrian', 'Azerbaijani', 'Bahraini', 'Bangladeshi', 
+            'Belgian', 'Beninese', 'Bhutanese', 'Bolivian', 'Bosnian', 'Brazilian', 
+            'British', 'Bulgarian', 'Burkinabe', 'Cambodian', 'Cameroonian', 
+            'Canadian', 'Chadian', 'Chilean', 'Chinese', 'Colombian', 'Congolese', 
+            'Croatian', 'Cuban', 'Czech', 'Danish', 'Dominican', 'Dutch', 
+            'Ecuadorian', 'Egyptian', 'Emirati', 'Eritrean', 'Estonian', 
+            'Ethiopian', 'Filipino', 'Finnish', 'French', 'Gabonese', 'Gambian', 
+            'Georgian', 'German', 'Ghanaian', 'Greek', 'Guatemalan', 'Guinean', 
+            'Haitian', 'Honduran', 'Hungarian', 'Icelander', 'Indian', 
+            'Indonesian', 'Iranian', 'Iraqi', 'Irish', 'Israeli', 'Italian', 
+            'Ivorian', 'Jamaican', 'Japanese', 'Jordanian', 'Kazakhstani', 
+            'Kenyan', 'Korean (North)', 'Korean (South)', 'Kosovar', 'Kuwaiti', 
+            'Kyrgyzstani', 'Laotian', 'Latvian', 'Lebanese', 'Liberian', 'Libyan', 
+            'Lithuanian', 'Luxembourger', 'Malagasy', 'Malaysian', 'Malian', 
+            'Maltese', 'Mauritanian', 'Mexican', 'Moldovan', 'Mongolian', 
+            'Montenegrin', 'Moroccan', 'Mozambican', 'Myanmar (Burmese)', 
+            'Namibian', 'Nepalese', 'New Zealander', 'Nicaraguan', 'Nigerien', 
+            'Nigerian', 'Norwegian', 'Omani', 'Pakistani', 'Palestinian', 
+            'Panamanian', 'Paraguayan', 'Peruvian', 'Polish', 'Portuguese', 
+            'Qatari', 'Romanian', 'Russian', 'Rwandan', 'Salvadoran', 
+            'Saudi Arabian', 'Senegalese', 'Serbian', 'Singaporean', 'Slovak', 
+            'Slovenian', 'Somali', 'South African', 'Spanish', 'Sri Lankan', 
+            'Sudanese', 'Surinamese', 'Swedish', 'Swiss', 'Syrian', 'Tanzanian', 
+            'Thai', 'Togolese', 'Trinidadian', 'Tunisian', 'Turkish', 'Turkmen', 
+            'Ugandan', 'Ukrainian', 'Uruguayan', 'Uzbekistani', 'Venezuelan', 
+            'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean'
+        ];
+
+        // Interest options
+        $interest_options = [
+            'Unknown', 'Buy', 'Sell', 'Rent', 'Invest', 'Commercial'
+        ];
+
+        // Source options
+        $source_options = [
+            'DLD List', 'Green List', 'Contact Form', 'Chat Bot', 
+            'PropertyFinder Listing', 'Website Listing', 'Advertisement', 
+            'Social Media', 'Referrals', 'Manual', 'Other'
+        ];
 
         ?>
+        <style>
+            .herohub-meta-box {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .herohub-field {
+                flex: 1;
+                min-width: calc(33.333% - 10px);
+                margin-bottom: 10px;
+            }
+            .herohub-field label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            .herohub-field input, 
+            .herohub-field select,
+            .herohub-select2-container {
+                width: 100%;
+                padding: 6px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-sizing: border-box;
+                height: 36px;
+            }
+            .select2-container {
+                width: 100% !important;
+            }
+            .herohub-select2-dropdown {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+            .herohub-select2-dropdown .select2-search__field {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 6px;
+                box-sizing: border-box;
+            }
+            .herohub-select2-dropdown .select2-results__option {
+                padding: 6px;
+            }
+        </style>
         <div class="herohub-meta-box">
-            <div class="herohub-row">
-                <div class="herohub-field">
-                    <label for="contact_email"><?php _e('Email', 'herohub-crm'); ?></label>
-                    <input type="email" id="contact_email" name="contact_email" value="<?php echo esc_attr($email); ?>">
-                </div>
+            <div class="herohub-field">
+                <label for="contact_first_name"><?php _e('First Name', 'herohub-crm'); ?></label>
+                <input type="text" id="contact_first_name" name="contact_first_name" value="<?php echo esc_attr($first_name); ?>">
+            </div>
 
-                <div class="herohub-field">
-                    <label for="contact_phone"><?php _e('Phone', 'herohub-crm'); ?></label>
-                    <input type="tel" id="contact_phone" name="contact_phone" value="<?php echo esc_attr($phone); ?>">
-                </div>
+            <div class="herohub-field">
+                <label for="contact_last_name"><?php _e('Last Name', 'herohub-crm'); ?></label>
+                <input type="text" id="contact_last_name" name="contact_last_name" value="<?php echo esc_attr($last_name); ?>">
+            </div>
 
-                <div class="herohub-field">
-                    <label for="contact_mobile"><?php _e('Mobile', 'herohub-crm'); ?></label>
-                    <input type="tel" id="contact_mobile" name="contact_mobile" value="<?php echo esc_attr($mobile); ?>">
-                </div>
+            <div class="herohub-field">
+                <label for="contact_email"><?php _e('Email', 'herohub-crm'); ?></label>
+                <input type="email" id="contact_email" name="contact_email" value="<?php echo esc_attr($email); ?>">
+            </div>
 
-                <div class="herohub-field">
-                    <label for="contact_preferred_contact"><?php _e('Preferred Contact Method', 'herohub-crm'); ?></label>
-                    <select id="contact_preferred_contact" name="contact_preferred_contact">
-                        <option value=""><?php _e('Select Method', 'herohub-crm'); ?></option>
-                        <option value="email" <?php selected($preferred_contact, 'email'); ?>><?php _e('Email', 'herohub-crm'); ?></option>
-                        <option value="phone" <?php selected($preferred_contact, 'phone'); ?>><?php _e('Phone', 'herohub-crm'); ?></option>
-                        <option value="mobile" <?php selected($preferred_contact, 'mobile'); ?>><?php _e('Mobile', 'herohub-crm'); ?></option>
-                        <option value="whatsapp" <?php selected($preferred_contact, 'whatsapp'); ?>><?php _e('WhatsApp', 'herohub-crm'); ?></option>
-                    </select>
-                </div>
+            <div class="herohub-field">
+                <label for="contact_nationality"><?php _e('Nationality', 'herohub-crm'); ?></label>
+                <select id="contact_nationality" name="contact_nationality" class="herohub-select2">
+                    <option value=""><?php _e('Select Nationality', 'herohub-crm'); ?></option>
+                    <?php foreach ($nationalities as $nat): ?>
+                        <option value="<?php echo esc_attr($nat); ?>" <?php selected($nationality, $nat); ?>><?php echo esc_html($nat); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                <div class="herohub-field">
-                    <label for="contact_address"><?php _e('Address', 'herohub-crm'); ?></label>
-                    <textarea id="contact_address" name="contact_address" rows="3"><?php echo esc_textarea($address); ?></textarea>
-                </div>
+            <div class="herohub-field">
+                <label for="contact_mobile_phone"><?php _e('Mobile Phone', 'herohub-crm'); ?></label>
+                <input type="tel" id="contact_mobile_phone" name="contact_mobile_phone" value="<?php echo esc_attr($mobile_phone); ?>">
+            </div>
+
+            <div class="herohub-field">
+                <label for="contact_whatsapp"><?php _e('WhatsApp', 'herohub-crm'); ?></label>
+                <input type="tel" id="contact_whatsapp" name="contact_whatsapp" value="<?php echo esc_attr($whatsapp); ?>">
+            </div>
+
+            <div class="herohub-field">
+                <label for="contact_interest"><?php _e('Interest', 'herohub-crm'); ?></label>
+                <select id="contact_interest" name="contact_interest">
+                    <option value=""><?php _e('Select Interest', 'herohub-crm'); ?></option>
+                    <?php foreach ($interest_options as $opt): ?>
+                        <option value="<?php echo esc_attr($opt); ?>" <?php selected($interest, $opt); ?>><?php echo esc_html($opt); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="herohub-field">
+                <label for="contact_source"><?php _e('Source', 'herohub-crm'); ?></label>
+                <select id="contact_source" name="contact_source">
+                    <option value=""><?php _e('Select Source', 'herohub-crm'); ?></option>
+                    <?php foreach ($source_options as $src): ?>
+                        <option value="<?php echo esc_attr($src); ?>" <?php selected($source, $src); ?>><?php echo esc_html($src); ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
         <?php
@@ -295,30 +365,29 @@ class Contact {
         }
 
         // Save fields
-        $detail_fields = array(
+        $fields = array(
             '_contact_first_name',
             '_contact_last_name',
-            '_contact_company',
-            '_contact_position',
-            '_contact_nationality',
-            '_contact_passport'
-        );
-
-        $communication_fields = array(
             '_contact_email',
-            '_contact_phone',
-            '_contact_mobile',
-            '_contact_preferred_contact',
-            '_contact_address'
+            '_contact_nationality',
+            '_contact_mobile_phone',
+            '_contact_whatsapp',
+            '_contact_interest',
+            '_contact_source'
         );
 
-        $all_fields = array_merge($detail_fields, $communication_fields);
-
-        foreach ($all_fields as $field) {
+        foreach ($fields as $field) {
             $key = str_replace('_contact_', '', $field);
             if (isset($_POST[$key])) {
                 update_post_meta($post_id, $field, sanitize_text_field($_POST[$key]));
             }
         }
+    }
+
+    /**
+     * Initialize hooks for Select2
+     */
+    public function init_select2_hooks() {
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_select2_scripts'));
     }
 }
