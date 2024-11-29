@@ -1,6 +1,14 @@
 jQuery(document).ready(function($) {
     'use strict';
 
+    // Initialize tooltips
+    $('[data-tooltip]').each(function() {
+        $(this).tooltip({
+            content: $(this).data('tooltip'),
+            position: { my: 'left center', at: 'right+10 center' }
+        });
+    });
+
     // Refresh dashboard data periodically
     function refreshDashboardData() {
         if ($('.herohub-dashboard').length) {
@@ -72,9 +80,6 @@ jQuery(document).ready(function($) {
         setInterval(refreshDashboardData, 300000);
     }
 
-    // Initialize tooltips
-    $('[data-tooltip]').tooltip();
-
     // Handle responsive menu toggle
     $('.menu-toggle').on('click', function(e) {
         e.preventDefault();
@@ -130,22 +135,29 @@ jQuery(document).ready(function($) {
     // Handle settings form submission
     $('#herohub-settings-form').on('submit', function(e) {
         e.preventDefault();
-        const form = $(this);
-        const submitButton = form.find('button[type="submit"]');
+        const $form = $(this);
+        const $submitButton = $form.find('button[type="submit"]');
         
-        submitButton.prop('disabled', true);
+        $submitButton.prop('disabled', true);
         
         $.ajax({
             url: herohubAdmin.ajaxurl,
             type: 'POST',
-            data: form.serialize() + '&action=herohub_save_settings&nonce=' + herohubAdmin.nonce,
+            data: $form.serialize() + '&action=herohub_save_settings&nonce=' + herohubAdmin.nonce,
             success: function(response) {
-                submitButton.prop('disabled', false);
                 if (response.success) {
-                    $('.settings-notice').removeClass('error').addClass('success').text(response.data.message).show();
-                } else {
-                    $('.settings-notice').removeClass('success').addClass('error').text(response.data.message).show();
+                    // Show success message
+                    const $message = $('<div class="notice notice-success"><p>Settings saved successfully!</p></div>');
+                    $form.before($message);
+                    setTimeout(function() {
+                        $message.fadeOut(function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
                 }
+            },
+            complete: function() {
+                $submitButton.prop('disabled', false);
             }
         });
     });

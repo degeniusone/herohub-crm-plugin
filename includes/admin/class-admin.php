@@ -48,10 +48,15 @@ class Admin {
      * Register the JavaScript for the admin area.
      */
     public function enqueue_scripts() {
+        // Enqueue jQuery UI and its dependencies
+        wp_enqueue_script('jquery-ui-core');
+        wp_enqueue_script('jquery-ui-tooltip');
+        wp_enqueue_style('jquery-ui-theme', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css');
+
         wp_enqueue_script(
             'herohub-crm-admin',
             plugin_dir_url(dirname(dirname(__FILE__))) . 'assets/js/admin.js',
-            array('jquery'),
+            array('jquery', 'jquery-ui-tooltip'),
             $this->version,
             false
         );
@@ -64,8 +69,8 @@ class Admin {
             false
         );
 
-        wp_localize_script('herohub-crm-admin', 'herohub_crm', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
+        wp_localize_script('herohub-crm-admin', 'herohubAdmin', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('herohub_crm_nonce'),
         ));
     }
