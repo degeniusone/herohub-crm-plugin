@@ -8,7 +8,6 @@ if (!defined('WPINC')) {
 
 use HeroHub\CRM\Core\Post_Types;
 use HeroHub\CRM\Core\Taxonomies;
-use HeroHub\CRM\Core\Roles_Manager;
 use HeroHub\CRM\Core\Permissions_Manager;
 use HeroHub\CRM\Core\Property_Manager;
 use HeroHub\CRM\Core\SMS_Manager;
@@ -22,7 +21,6 @@ class HeroHub_CRM {
     protected $post_types;
     protected $taxonomies;
     protected $property_manager;
-    protected $roles_manager;
     protected $permissions_manager;
     protected $sms_manager;
     protected $settings;
@@ -46,7 +44,6 @@ class HeroHub_CRM {
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/cpt/class-contact.php';
 
         // Load Core Classes
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-roles-manager.php';
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-permissions-manager.php';
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-sms-manager.php';
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/core/class-settings.php';
@@ -62,7 +59,6 @@ class HeroHub_CRM {
 
     private function init_components() {
         // Initialize core components
-        $this->roles_manager = new Core\Roles_Manager();
         $this->permissions_manager = new Core\Permissions_Manager();
         $this->sms_manager = new Core\SMS_Manager();
         $this->settings = new Core\Settings();
@@ -73,7 +69,7 @@ class HeroHub_CRM {
         $this->property_manager = new Property_Manager();
         
         // Register activation hook
-        register_activation_hook(HEROHUB_CRM_FILE, array('HeroHub\CRM\Installer', 'install'));
+        register_activation_hook(HEROHUB_CRM_FILE, array('HeroHub\\CRM\\Installer', 'install'));
     }
 
     private function define_cpt_hooks() {
@@ -96,11 +92,17 @@ class HeroHub_CRM {
     }
 
     private function define_hooks() {
+        $this->loader->add_action('plugins_loaded', $this, 'load_textdomain');
+        $this->loader->add_action('admin_menu', $this->admin, 'add_menu_pages');
+        $this->loader->add_action('admin_enqueue_scripts', $this->admin, 'enqueue_styles');
+        $this->loader->add_action('admin_enqueue_scripts', $this->admin, 'enqueue_scripts');
+        $this->loader->add_action('wp_enqueue_scripts', $this->admin, 'enqueue_frontend_styles');
+        $this->loader->add_action('wp_enqueue_scripts', $this->admin, 'enqueue_frontend_scripts');
+        
         $this->define_cpt_hooks();
         $this->define_admin_hooks();
         
         // Add core hooks
-        $this->loader->add_action('init', $this->roles_manager, 'register_roles');
         $this->loader->add_action('init', $this->permissions_manager, 'register_post_type_capabilities');
         $this->loader->add_filter('map_meta_cap', $this->permissions_manager, 'map_meta_caps', 10, 4);
         
