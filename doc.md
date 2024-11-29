@@ -1,9 +1,18 @@
 # HeroHub CRM Plugin Documentation
 
-## Project Overview
-HeroHub CRM is a comprehensive WordPress plugin designed for real estate professionals to manage their contacts, properties, deals, and activities.
+## 1. Project Overview
 
-## Project Structure
+### 1.1 Description
+HeroHub CRM is a comprehensive WordPress plugin designed for real estate professionals to manage contacts, properties, deals, and activities efficiently.
+
+### 1.2 Key Features
+- Custom Post Types (Contacts, Deals, Properties, Events, Activities)
+- Advanced User Roles and Permissions
+- Comprehensive Dashboard Views
+- Data Management and Reporting
+
+## 2. Project Structure
+
 ```
 herohub_plugin/
 ├── assets/
@@ -11,223 +20,304 @@ herohub_plugin/
 │   └── js/
 ├── includes/
 │   ├── admin/
-│   └── core/
-└── templates/
+│   ├── core/
+│   ├── cpt/
+│   └── providers/
+├── tests/
+└── docs/
 ```
 
-## Version Control
-The project uses Git for version control. Important branches:
-- main: Production-ready code
-- develop: Development and integration
-- feature/*: New features
+## 3. Development Roadmap
 
-## Task Tracking
-
-### Core Features
+### 3.1 Completed Features
 - [x] Custom Post Types
-  - [x] Contacts
-  - [x] Deals
-  - [x] Properties
-  - [x] Events
-  - [x] Activities
-
 - [x] User Roles and Permissions
-  - [x] Administrator role
-  - [x] Manager role
-  - [x] Agent role
-  - [x] Role management interface
-  - [x] Role-based access control
+- [x] Basic Dashboard Functionality
 
-- [ ] Dashboard Views
-  - [ ] Admin dashboard
-  - [ ] Manager dashboard
-  - [ ] Agent dashboard
-  - [ ] Analytics widgets
+### 3.2 Pending Features
+- [ ] Advanced Analytics
+- [ ] Enhanced Reporting
+- [ ] Third-party Integrations
 
-- [ ] List Management
-  - [ ] Contact list with filtering
-  - [ ] Deal list with filtering
-  - [ ] Property list with filtering
-  - [ ] Event calendar view
-  - [ ] Activity log view
+## 4. Custom Post Types and Fields
 
-- [ ] Data Management
-  - [ ] CSV import/export
-  - [ ] Report generation
-  - [ ] Data relationships
-  - [ ] Bulk operations
+### 4.1 Contacts
+| Field Name | Label | Type | Options |
+|-----------|-------|------|---------|
+| full_name | Full Name | Text | - |
+| email | Email | Email | - |
+| phone_number | Phone Number | Text | - |
+| interest | Interest | Dropdown | Buy, Sell, Rent, Invest |
+| contact_status | Contact Status | Dropdown | Cold Lead, Warm Lead, Hot Lead |
 
-### Technical Tasks
-- [x] Project setup
-- [x] Version control setup
-- [x] Documentation
-- [ ] Performance optimization
-- [ ] Security hardening
-- [ ] Testing
-  - [ ] Unit tests
-  - [ ] Integration tests
-  - [ ] User acceptance testing
+### 4.2 Deals
+| Field Name | Label | Type | Options |
+|-----------|-------|------|---------|
+| deal_name | Deal Name | Text | - |
+| deal_stage | Stage | Dropdown | New, In Progress, Won, Lost |
+| asking_price | Asking Price | Number | - |
 
-## Custom Fields
+### 4.3 Properties
+| Field Name | Label | Type | Options |
+|-----------|-------|------|---------|
+| address | Address | Text | - |
+| property_type | Property Type | Dropdown | Villa, Apartment, Townhouse |
+| beds | Bedrooms | Number | - |
+| status | Status | Dropdown | Available, Sold |
 
-### Contact Fields
-- Field Name: full_name | Label: Full Name | Type: Text | Options: -
-- Field Name: first_name | Label: First Name | Type: Text | Options: -
-- Field Name: last_name | Label: Last Name | Type: Text | Options: -
-- Field Name: phone_number | Label: Phone Number | Type: Text | Options: -
-- Field Name: whatsapp_number | Label: WhatsApp Number | Type: Text | Options: -
-- Field Name: email | Label: Email | Type: Email | Options: -
-- Field Name: nationality | Label: Nationality | Type: Dropdown | Options: Predefined list of countries
-- Field Name: interest | Label: Interest | Type: Dropdown | Options: Buy, Sell, Rent, Invest, Commercial
-- Field Name: property_type | Label: Property Type | Type: Dropdown | Options: Villa, Apartment, Townhouse, Offplan
-- Field Name: area | Label: Area | Type: Text | Options: -
-- Field Name: project_building | Label: Project/Building | Type: Text | Options: -
-- Field Name: city | Label: City | Type: Text | Options: -
-- Field Name: purchase_price | Label: Purchase Price | Type: Number | Options: -
-- Field Name: purchase_date | Label: Purchase Date | Type: Date | Options: -
-- Field Name: beds | Label: Bedrooms | Type: Number | Options: -
-- Field Name: baths | Label: Bathrooms | Type: Number | Options: -
-- Field Name: property_size | Label: Property Size | Type: Number | Options: -
-- Field Name: contact_status | Label: Contact Status | Type: Dropdown | Options: Cold Lead, Warm Lead, Hot Lead, Customer, VIP Customer, Dead Lead
-- Field Name: assigned_agent | Label: Assigned Agent | Type: Relation | Options: Linked Agent
+## 5. User Roles
 
-### Deal Fields
-- Field Name: deal_name | Label: Deal Name | Type: Text | Options: -
-- Field Name: associated_contacts | Label: Associated Contacts | Type: Relation | Options: Linked Contacts
-- Field Name: associated_properties | Label: Associated Properties | Type: Relation | Options: Linked Properties
-- Field Name: deal_stage | Label: Stage | Type: Dropdown | Options: New, In Progress, Won, Lost
-- Field Name: deal_type | Label: Deal Type | Type: Dropdown | Options: Sale, Rental, Lease
-- Field Name: asking_price | Label: Asking Price | Type: Number | Options: -
-- Field Name: documents | Label: Documents | Type: File Upload | Options: Multiple
+### 5.1 Role Hierarchy
+1. Administrator
+2. Manager
+3. Agent
 
-### Property Fields
-- Field Name: address | Label: Address | Type: Text | Options: -
-- Field Name: area | Label: Area | Type: Text | Options: -
-- Field Name: property_type | Label: Property Type | Type: Dropdown | Options: Villa, Apartment, Townhouse, Offplan
-- Field Name: purchase_price | Label: Purchase Price | Type: Number | Options: -
-- Field Name: notes | Label: Notes | Type: Textarea | Options: -
-- Field Name: status | Label: Status | Type: Dropdown | Options: Available, Sold
-- Field Name: beds | Label: Bedrooms | Type: Number | Options: -
-- Field Name: baths | Label: Bathrooms | Type: Number | Options: -
-- Field Name: property_size | Label: Property Size | Type: Number | Options: -
+### 5.2 Role Capabilities
+- **Administrator**: Full system access
+- **Manager**: Team management, reporting
+- **Agent**: Contact and deal management
 
-### Event Fields
-- Field Name: event_title | Label: Event Title | Type: Text | Options: -
-- Field Name: event_date | Label: Event Date | Type: Date | Options: -
-- Field Name: event_status | Label: Status | Type: Dropdown | Options: Scheduled, Completed, Missed
-- Field Name: linked_contact | Label: Linked Contact | Type: Relation | Options: Associated Contact
-- Field Name: linked_agent | Label: Linked Agent | Type: Relation | Options: Associated Agent
-- Field Name: event_type | Label: Event Type | Type: Dropdown | Options: Scheduled Calls, Follow Up Calls, Schedule Meeting, Actions, Task
+## 6. Technical Specifications
 
-### Activity Fields
-- Field Name: activity_type | Label: Activity Type | Type: Dropdown | Options: Call, Meeting, Follow-Up
-- Field Name: activity_date | Label: Activity Date | Type: Date | Options: -
-- Field Name: activity_notes | Label: Notes | Type: Textarea | Options: -
-- Field Name: activity_status | Label: Status | Type: Dropdown | Options: [List of all status options provided]
-- Field Name: linked_contact | Label: Linked Contact | Type: Relation | Options: Associated Contact
-- Field Name: linked_agent | Label: Linked Agent | Type: Relation | Options: Associated Agent (hidden)
+### 6.1 WordPress Integration
+- Utilizes WordPress core user management
+- Follows WordPress coding standards
+- Leverages WordPress hooks and actions
 
-### Manager Fields
-- Field Name: first_name | Label: First Name | Type: Text | Options: -
-- Field Name: last_name | Label: Last Name | Type: Text | Options: -
-- Field Name: email | Label: Email | Type: Email | Options: -
-- Field Name: profile_image | Label: Profile Image | Type: Image Upload | Options: -
-- Field Name: bio | Label: Bio | Type: Textarea | Options: -
-- Field Name: title | Label: Title | Type: Text | Options: -
-- Field Name: whatsapp_number | Label: WhatsApp Number | Type: Text | Options: -
-- Field Name: area_of_expertise | Label: Area of Expertise | Type: Text | Options: -
-- Field Name: social_media | Label: Social Media | Type: Repeater | Options: Type (Facebook, Instagram, LinkedIn, TikTok, YouTube, Property Finder), URL
-- Field Name: starting_date | Label: Starting Date | Type: Date | Options: - (Managers only)
-- Field Name: documents | Label: Documents | Type: File Upload | Options: Multiple (Managers only)
-- Field Name: hr_notes | Label: HR Notes | Type: Repeater | Options: Date, Note (Managers only)
-- Field Name: sales_amount | Label: Amount in Sales | Type: Number | Options: - (Managers only)
-- Field Name: calls_made | Label: Number of Calls | Type: Number | Options: - (Managers only)
-- Field Name: listings_created | Label: Number of Listings | Type: Number | Options: - (Managers only)
-- Field Name: commission_gained | Label: Commission Gained | Type: Number | Options: - (Managers only)
+### 6.2 Performance Considerations
+- Optimized database queries
+- Efficient data caching
+- Minimal performance overhead
 
-## Admin Page Breakdowns
+## 7. Security Measures
 
-### Dashboard
-Features:
-- Different sections for Admin, Manager, and Agent roles
-- Manager upload function for CSV leads
-- Calendar/list view widget for agents
-- Note widget for agents
-- List of leads and follow-up contacts in order of importance
-- Analytics for agents and managers
-- Manager view: In-depth analytics of each agent and as a group, filterable by time period
-- Toggle switch for managers with dual roles (agent/manager)
+### 7.1 Access Control
+- Role-based permissions
+- Nonce verification
+- Input sanitization
 
-### Contacts
-Features:
-- Table view, filterable by status and tags
-- Single contact page (editable)
-- Display fields, activities history, and relationship with events and deals
-- Option to create events and deals from single contact page
+### 7.2 Data Protection
+- Secure data handling
+- Encrypted sensitive information
+- Regular security audits
 
-### Deals
-Features:
-- Must be assigned to a contact to be saved
-- Can be created from single contact page as a popup
-- Popup appears automatically when Customer group status is chosen
+## 8. Future Roadmap
 
-### Activities
-Features:
-- Widget on single contact page
-- "Add Activities" action
-- Must be connected to an agent or contact
+### 8.1 Planned Enhancements
+- Machine learning lead scoring
+- Advanced reporting
+- More third-party integrations
 
-### Events
-Features:
-- Calendar view and table view
-- Can be added by clicking on the calendar
+### 8.2 Performance Goals
+- Reduce database query times
+- Improve caching mechanisms
+- Enhance scalability
 
-### Users
-Features:
-- WordPress Users page with additional fields for agents and managers
-- Profile editing for agents (social media, number, bio, image, area, title)
+## 9. Contribution Guidelines
 
-### Settings
-- Admin access only
-- Managers with dual roles can toggle between "My Contacts," specific agents, or ALL
-- Toggle switch visible on every screen for agent/manager role switching
+### 9.1 Development Process
+- Fork the repository
+- Create feature branches
+- Submit pull requests
+- Follow coding standards
 
-## Integration Points
+### 9.2 Coding Standards
+- PSR-4 autoloading
+- WordPress coding standards
+- Comprehensive documentation
 
-### Third-party Integrations
-Email Marketing Tools, Payment Gateways, Document Signing services, Property Finder
+## 10. License and Attribution
 
-### WordPress Core Integration
-User Management to sync with WordPress users; Media Library integration for property images
+### 10.1 Licensing
+- Proprietary software
+- All rights reserved
 
-## Performance Considerations
-Implement caching for frequently accessed data; Use transients for storing temporary data; Optimize database queries
+### 10.2 Dependencies
+- WordPress 5.7+
+- PHP 7.4+
 
-## Security Measures
-Implement nonce checks for all form submissions; Sanitize and validate all user inputs; Use WordPress capabilities system
+## 11. Contact and Support
 
-## Localization
-Ensure all user-facing strings are translatable; Provide a .pot file for translations
+### 11.1 Support Channels
+- Email: support@herohub.com
+- Documentation
+- GitHub Issues
 
-## Testing
+### 11.2 Community
+- Developer forum
+- Regular updates
+- Community-driven improvements
 
-### Unit Tests
-Test individual functions and methods; Ensure proper data sanitization and validation
+## 12. AI Operational Guidelines
 
-### Integration Tests
-Test interactions between different modules; Verify API endpoint functionality
+### 12.1 Core Principles
 
-### User Acceptance Testing
-Create test scenarios for each user role; Verify workflow completions (e.g., contact to deal conversion)
+#### 12.1.1 Project Structure Integrity
+- **Strict Adherence**: Maintain the established project structure exactly as defined in section 2
+- **No Unnecessary Directories**: Avoid creating new directories or folders
+- **Consolidation Priority**: Always prefer consolidating existing files over creating new ones
 
-## UI/UX Considerations
-- Customize WordPress admin menu to include all necessary pages
-- Use WordPress admin notices for important messages
-- Leverage WordPress metaboxes for organizing information on edit screens
-- Utilize WordPress admin tables for list views with sorting and filtering capabilities
+#### 12.1.2 Code and Development Standards
+- **WordPress Best Practices**: Strictly follow WordPress coding standards and guidelines
+- **No Hallucinations**: Never invent or fabricate code, features, or functionality
+- **Factual Accuracy**: Only implement or discuss features that have been explicitly requested
+- **Transparency**: Clearly communicate any concerns or alternative approaches to the user
 
-## Development Notes
-- Ensure compatibility with WordPress coding standards.
-- Maintain modularity for easy updates.
-- Use WordPress REST API for future integrations.
-- Follow the task list above for systematic development.
+#### 12.1.3 File Management
+- **Minimal Disruption**: Minimize changes to existing file structures
+- **Refactoring Approach**: 
+  - Consolidate similar functionality
+  - Remove redundant code
+  - Improve code organization without changing core functionality
+
+#### 12.1.4 Communication Protocol
+- **Proactive Guidance**: Provide clear rationale for any suggested changes
+- **Alternative Proposals**: If a requested approach seems suboptimal, present alternative solutions
+- **Detailed Explanations**: Provide comprehensive context for all recommendations
+
+#### 12.1.5 Development Integrity
+- **No Scope Creep**: Strictly adhere to the current project scope
+- **Performance Consideration**: Prioritize efficient, lightweight implementations
+- **Security First**: Always consider security implications of any changes
+
+### 12.2 Ethical AI Interaction Guidelines
+
+#### 12.2.1 User Collaboration
+- **Active Listening**: Carefully understand and interpret user requirements
+- **Collaborative Problem-Solving**: Work alongside the user, not in isolation
+- **Respect User Intent**: Implement solutions that align with the user's vision
+
+#### 12.2.2 Transparency Principles
+- **Clear Documentation**: Document all changes and reasoning
+- **No Hidden Modifications**: Disclose all proposed changes before implementation
+- **Version Control Awareness**: Maintain clean, traceable changes
+
+### 12.3 Technical Constraint Principles
+
+#### 12.3.1 Resource Management
+- **Minimal Resource Usage**: Optimize for performance and minimal resource consumption
+- **Avoid Unnecessary Complexity**: Keep solutions simple and straightforward
+- **Efficient Code Generation**: Generate only the code necessary to solve the specific problem
+
+#### 12.3.2 Compatibility Assurance
+- **Version Compatibility**: Ensure all changes are compatible with specified WordPress and PHP versions
+- **Backward Compatibility**: Maintain existing functionality while improving code
+- **Dependency Management**: Carefully manage and minimize external dependencies
+
+### 12.4 Continuous Improvement Framework
+
+#### 12.4.1 Learning and Adaptation
+- **Iterative Refinement**: Continuously improve code quality
+- **User Feedback Integration**: Incorporate user suggestions and feedback
+- **Stay Updated**: Keep abreast of latest WordPress development practices
+
+#### 12.4.2 Problem-Solving Approach
+- **Root Cause Analysis**: Address underlying issues, not just symptoms
+- **Systematic Debugging**: Use methodical approach to identifying and resolving issues
+- **Preventive Optimization**: Anticipate potential future challenges
+
+### 12.5 Commitment Statement
+
+As an AI assistant, I commit to:
+- Maintaining the highest standards of code quality
+- Prioritizing the user's project goals
+- Providing transparent, honest, and helpful guidance
+- Continuously learning and improving
+- Respecting the integrity of the HeroHub CRM plugin project
+
+### 12.6 Additional Operational Protocols
+
+#### 12.6.1 Communication and Interaction
+- **Question Precedence**: Always answer questions before implementing any changes
+- **Guideline Consistency**: Rigorously follow established guidelines in every interaction
+- **Proactive Clarification**: Seek user confirmation and clarification when needed
+
+#### 12.6.2 Version Control Management
+- **Branch Naming Convention**: 
+  - Update branch names appropriately before pushing changes
+  - Use descriptive, meaningful branch names that reflect the nature of modifications
+- **Automated Git Maintenance**: 
+  - Perform Git housekeeping tasks automatically after every 25 changes
+  - Include tasks such as:
+    - Pruning old branches
+    - Cleaning up merged branches
+    - Updating remote references
+
+#### 12.6.3 Change Management
+- **Incremental Updates**: Break down complex changes into smaller, manageable commits
+- **Clear Commit Messages**: Provide detailed, descriptive commit messages
+- **Continuous Review**: Regularly review and validate changes against project guidelines
+
+#### 12.6.4 Documentation Synchronization
+- **Real-Time Documentation**: Update the project documentation (`doc.md`) to reflect any changes made during Git commits
+- **Comprehensive Tracking**: 
+  - Ensure documentation accurately represents the current state of the project
+  - Maintain a clear, up-to-date record of project evolution
+  - Synchronize documentation changes with code modifications
+- **Commit Documentation Updates**: 
+  - Include documentation updates as part of the commit process
+  - Provide clear, concise explanations of documentation changes
+  - Ensure documentation remains a reliable source of project information
+
+#### 12.6.5 Performance and Resource Management
+- **Computational Monitoring**:
+  - Track and log resource usage during code generation
+  - Set strict thresholds for computational complexity
+  - Provide detailed warnings for potential performance bottlenecks
+- **Resource Optimization**:
+  - Minimize memory and processing overhead
+  - Implement efficient algorithms
+  - Avoid unnecessary computational redundancy
+
+#### 12.6.6 Dependency and Compatibility Governance
+- **Dependency Tracking**:
+  - Maintain a comprehensive, up-to-date dependency inventory
+  - Automatically detect and flag potential version conflicts
+  - Monitor deprecation risks for external libraries
+- **Compatibility Assurance**:
+  - Continuous compatibility checks with:
+    - Latest WordPress versions
+    - PHP version requirements
+    - Major plugin ecosystems
+  - Proactive adaptation to emerging technological standards
+
+#### 12.6.7 Accessibility and Internationalization Protocols
+- **Accessibility Compliance**:
+  - Strictly adhere to WCAG 2.1 AA guidelines
+  - Implement semantic HTML and ARIA attributes
+  - Ensure keyboard navigation and screen reader compatibility
+- **Internationalization Best Practices**:
+  - Use WordPress translation functions (`__()`, `_e()`)
+  - Prepare all user-facing strings for translation
+  - Support right-to-left (RTL) language layouts
+  - Maintain a comprehensive `.pot` translation template
+
+#### 12.6.8 Advanced Security Methodology
+- **Automated Security Scanning**:
+  - Integrate comprehensive security vulnerability detection
+  - Check for:
+    - SQL injection risks
+    - Cross-Site Scripting (XSS) vulnerabilities
+    - Cross-Site Request Forgery (CSRF) protection
+- **Input Validation Protocols**:
+  - Sanitize all user inputs
+  - Escape all output
+  - Implement strict type checking
+  - Use WordPress built-in sanitization functions
+
+#### 12.6.9 Code Quality and Maintainability Framework
+- **Automated Code Analysis**:
+  - Implement continuous code quality metrics tracking
+  - Monitor:
+    - Cyclomatic complexity
+    - Maintainability index
+    - Code duplication
+    - Cognitive complexity
+- **Improvement Recommendations**:
+  - Generate actionable suggestions for code refactoring
+  - Provide detailed explanations for potential improvements
+  - Prioritize readability and maintainability
+- **Documentation Integrity**:
+  - Ensure comprehensive inline documentation
+  - Generate clear, concise code comments
+  - Maintain a consistent documentation style
