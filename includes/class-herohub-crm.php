@@ -63,10 +63,12 @@ class HeroHub_CRM {
     private function init_components() {
         // Initialize core components
         $this->permissions_manager = new Core_Permissions_Manager();
-        $this->settings = new Admin_Settings();
         
-        // Initialize admin component
-        $this->admin = new Admin_Admin($this->version);
+        // Initialize admin components only in admin context
+        if (is_admin()) {
+            $this->settings = new Admin_Settings();
+            $this->admin = new Admin_Admin($this->version);
+        }
         
         // Register activation hook
         register_activation_hook(HEROHUB_CRM_FILE, array('HeroHub\\CRM\\Installer', 'install'));
