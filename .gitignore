@@ -17,6 +17,9 @@ Thumbs.db
 *.min.js
 *.map
 
+# Sample Data
+*.csv
+
 # WordPress specific
 *.log
 wp-config.php
