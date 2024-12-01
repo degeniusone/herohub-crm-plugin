@@ -22,8 +22,8 @@
 .herohub-crm-card,
 .herohub-role-section {
     background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 3px;
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
     padding: 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
@@ -34,8 +34,8 @@
 .herohub-role-section h2 {
     margin: 0 0 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #ccd0d4;
-    color: #23282d;
+    border-bottom: 1px solid #d3d3d3;
+    color: #858585;
     font-size: 1.3em;
 }
 
@@ -71,42 +71,154 @@
 }
 
 /* Meta Box Styles */
-.herohub-meta-box {
+.herohub-meta-box,
+.property-details-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     margin: 15px 0;
+    width: 100%;
 }
 
-.herohub-meta-box label {
+.herohub-field,
+.herohub-meta-box-field,
+.form-group {
+    flex: 0 0 calc(50% - 10px);
+    margin-bottom: 0;
+    position: relative;
+}
+
+/* Form Rows */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.form-row .form-group.full-width {
+    flex: 0 0 100%;
+}
+
+/* Ensure form groups have consistent height */
+.form-row .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: 600;
 }
 
+.form-row .form-group input,
+.form-row .form-group select,
+.form-row .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Labels */
+.herohub-field label,
+.herohub-meta-box label,
+.herohub-meta-box-field label,
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #858585;
+    font-size: 14px;
+}
+
+/* Form Elements Global Reset */
+.herohub-field input,
+.herohub-field select,
 .herohub-meta-box input[type="text"],
 .herohub-meta-box input[type="email"],
 .herohub-meta-box input[type="tel"],
 .herohub-meta-box input[type="number"],
 .herohub-meta-box select,
+.herohub-meta-box textarea,
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.select2-container--default .select2-selection--single {
+    margin: 0 !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 40px !important;
+    padding: 8px !important;
+    border: 1px solid #d3d3d3 !important;
+    border-radius: 4px !important;
+    background-color: #fff !important;
+    color: #858585 !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+}
+
+/* Number Input Specific Styles */
+input[type="number"] {
+    -moz-appearance: textfield !important;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* Textarea specific */
 .herohub-meta-box textarea {
-    width: 100%;
-    max-width: 400px;
+    height: auto !important;
+    min-height: 100px !important;
 }
 
-/* Settings Page */
-.herohub-settings {
-    max-width: 800px;
+/* Select Element Styles */
+.herohub-field select,
+.herohub-meta-box select,
+.form-group select {
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23858585%22%2F%3E%3C%2Fsvg%3E') !important;
+    background-position: calc(100% - 8px) center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 30px !important;
 }
 
-.herohub-settings h2 {
-    margin: 30px 0 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ccd0d4;
+/* Select2 Styles */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single {
+    padding: 0 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    height: 38px !important;
+    line-height: 38px !important;
+    padding-left: 8px !important;
+    padding-right: 30px !important;
+    color: #858585 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
+    width: 30px !important;
+    right: 1px !important;
+    top: 1px !important;
 }
 
 /* Status Messages */
 .herohub-status-message {
     padding: 10px;
     margin: 5px 0;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .herohub-status-success {
@@ -138,28 +250,24 @@
 
 .activity-time {
     font-size: 0.85em;
-    color: #646970;
+    color: #858585;
     margin-right: 10px;
 }
 
 /* Responsive Design */
 @media screen and (max-width: 782px) {
+    .herohub-field,
+    .herohub-meta-box-field,
+    .form-group {
+        flex: 0 0 100%;
+    }
+    
+    .form-row {
+        gap: 15px;
+    }
+    
     .dashboard-grid,
     .herohub-crm-overview {
         grid-template-columns: 1fr;
-    }
-    
-    .herohub-meta-box input[type="text"],
-    .herohub-meta-box input[type="email"],
-    .herohub-meta-box input[type="tel"],
-    .herohub-meta-box input[type="number"],
-    .herohub-meta-box select,
-    .herohub-meta-box textarea {
-        max-width: 100%;
-    }
-    
-    .wp-list-table td,
-    .wp-list-table th {
-        padding: 10px;
     }
 }

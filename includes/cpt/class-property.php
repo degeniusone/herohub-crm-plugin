@@ -41,6 +41,21 @@ class Property {
 
         // Add property form scripts
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
+
+        // Add property details metabox
+        add_action('add_meta_boxes', array($this, 'add_property_details_metabox'));
+
+        // Enqueue media and gallery scripts
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_gallery_scripts'));
+
+        // Add property gallery metabox
+        add_action('add_meta_boxes', array($this, 'add_property_gallery_metabox'));
+
+        // Save gallery images
+        add_action('save_post_property', array($this, 'save_property_gallery'));
+
+        // Remove default editor
+        add_action('admin_init', array($this, 'remove_default_editor'));
     }
 
     /**
@@ -435,7 +450,7 @@ class Property {
             'hierarchical'        => false,
             'menu_position'       => 5,
             'menu_icon'           => 'dashicons-building',
-            'supports'            => array('title', 'editor', 'thumbnail', 'excerpt'),
+            'supports'            => array('title', 'thumbnail', 'excerpt'),
         );
 
         register_post_type('property', $args);
@@ -488,28 +503,40 @@ class Property {
             'rewrite'           => false,
         ));
 
-        // Add default property types
-        $this->add_default_property_types();
-
-        // Add default property functions
-        $this->add_default_property_functions();
-    }
-
-    /**
-     * Add default property types
-     */
-    private function add_default_property_types() {
-        $default_types = array(
-            'asset' => __('Asset', 'herohub-crm'),
-            'listing' => __('Listing', 'herohub-crm'),
-            'request' => __('Request', 'herohub-crm'),
+        // Register Amenities Taxonomy
+        $labels = array(
+            'name'              => _x('Amenities', 'taxonomy general name', 'herohub-crm'),
+            'singular_name'     => _x('Amenity', 'taxonomy singular name', 'herohub-crm'),
+            'search_items'      => __('Search Amenities', 'herohub-crm'),
+            'all_items'         => __('All Amenities', 'herohub-crm'),
+            'parent_item'       => __('Parent Amenity', 'herohub-crm'),
+            'parent_item_colon' => __('Parent Amenity:', 'herohub-crm'),
+            'edit_item'         => __('Edit Amenity', 'herohub-crm'),
+            'update_item'       => __('Update Amenity', 'herohub-crm'),
+            'add_new_item'      => __('Add New Amenity', 'herohub-crm'),
+            'new_item_name'     => __('New Amenity Name', 'herohub-crm'),
+            'menu_name'         => __('Amenities', 'herohub-crm'),
         );
 
-        foreach ($default_types as $slug => $name) {
-            if (!term_exists($slug, 'property_type')) {
-                wp_insert_term($name, 'property_type', array('slug' => $slug));
-            }
-        }
+        $args = array(
+            'hierarchical'      => true,
+            'labels'            => $labels,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'query_var'         => true,
+            'show_in_menu'      => true,
+            'show_in_rest'      => true,
+            'publicly_queryable'=> true,
+            'rewrite'           => array('slug' => 'property-amenity'),
+        );
+
+        register_taxonomy('property_amenity', array('property'), $args);
+
+        // Add default property functions (which will serve as both types and functions)
+        $this->add_default_property_functions();
+
+        // Add default amenities
+        $this->add_default_amenities();
     }
 
     /**
@@ -523,8 +550,58 @@ class Property {
         );
 
         foreach ($default_functions as $slug => $name) {
+            // Add to property_function taxonomy
             if (!term_exists($slug, 'property_function')) {
                 wp_insert_term($name, 'property_function', array('slug' => $slug));
+            }
+            // Add to property_type taxonomy
+            if (!term_exists($slug, 'property_type')) {
+                wp_insert_term($name, 'property_type', array('slug' => $slug));
+            }
+        }
+    }
+
+    /**
+     * Add default property amenities
+     */
+    public function add_default_amenities() {
+        $default_amenities = array(
+            array(
+                'name' => 'Swimming Pool',
+                'icon' => 'fa-swimming-pool'
+            ),
+            array(
+                'name' => 'Gym',
+                'icon' => 'fa-dumbbell'
+            ),
+            array(
+                'name' => 'Parking',
+                'icon' => 'fa-parking'
+            ),
+            array(
+                'name' => 'Security',
+                'icon' => 'fa-shield-alt'
+            ),
+            array(
+                'name' => 'Garden',
+                'icon' => 'fa-tree'
+            ),
+            array(
+                'name' => 'Elevator',
+                'icon' => 'fa-elevator'
+            )
+        );
+
+        foreach ($default_amenities as $amenity) {
+            $term_exists = term_exists($amenity['name'], 'property_amenity');
+            
+            if (!$term_exists) {
+                $term = wp_insert_term($amenity['name'], 'property_amenity');
+                
+                if (!is_wp_error($term)) {
+                    // Add icon as term meta
+                    add_term_meta($term['term_id'], 'amenity_icon', $amenity['icon'], true);
+                }
             }
         }
     }
@@ -541,39 +618,350 @@ class Property {
      * Save property meta
      */
     public function save_meta($post_id) {
-        // If this is an autosave, our form has not been submitted, so we don't want to do anything
+        // Check nonce
+        if (!isset($_POST['property_details_nonce']) || 
+            !wp_verify_nonce($_POST['property_details_nonce'], 'property_details_nonce')) {
+            return;
+        }
+
+        // Check autosave
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
         }
 
-        // Check the user's permissions
+        // Check permissions
         if (!current_user_can('edit_post', $post_id)) {
             return;
         }
 
-        // Save featured image
-        if (isset($_POST['_thumbnail_id'])) {
-            $thumbnail_id = intval($_POST['_thumbnail_id']);
-            if ($thumbnail_id === -1) {
-                delete_post_meta($post_id, '_thumbnail_id');
+        // Define fields to save
+        $fields = array(
+            'unit' => 'text',
+            'area' => 'text',
+            'city' => 'text',
+            'price' => 'number',
+            'currency' => 'text',
+            'property_type' => 'text',
+            'property_function' => 'text',
+            'bedrooms' => 'number',
+            'bathrooms' => 'number',
+            'property_size' => 'number',
+            'property_status' => 'text',
+            'property_description' => 'text',
+        );
+
+        // Save each field
+        foreach ($fields as $field => $type) {
+            if (isset($_POST[$field])) {
+                $value = $_POST[$field];
+
+                // Sanitize based on type
+                switch ($type) {
+                    case 'number':
+                        $value = floatval($value);
+                        break;
+                    case 'text':
+                        $value = $field === 'property_description' 
+                            ? sanitize_textarea_field($value) 
+                            : sanitize_text_field($value);
+                        break;
+                }
+
+                // Update meta
+                update_post_meta($post_id, '_' . $field, $value);
             } else {
-                update_post_meta($post_id, '_thumbnail_id', $thumbnail_id);
+                // Delete meta if not set
+                delete_post_meta($post_id, '_' . $field);
             }
         }
 
-        // Save property owner
-        if (isset($_POST['property_owner'])) {
-            update_post_meta($post_id, '_property_owner', sanitize_text_field($_POST['property_owner']));
+        // Save price
+        if (isset($_POST['price'])) {
+            $price = sanitize_text_field($_POST['price']);
+            update_post_meta($post_id, '_price', $price);
         }
 
-        // Save assigned agent
-        if (isset($_POST['assigned_agent'])) {
-            update_post_meta($post_id, '_assigned_agent', sanitize_text_field($_POST['assigned_agent']));
+        // Save features
+        for ($i = 1; $i <= 3; $i++) {
+            if (isset($_POST['feature_' . $i])) {
+                $feature = sanitize_text_field($_POST['feature_' . $i]);
+                update_post_meta($post_id, '_feature_' . $i, $feature);
+            }
         }
 
-        // Save property function
-        if (isset($_POST['property_function'])) {
-            wp_set_object_terms($post_id, sanitize_text_field($_POST['property_function']), 'property_function');
+        // Save property status
+        if (isset($_POST['property_status'])) {
+            $property_status = sanitize_text_field($_POST['property_status']);
+            update_post_meta($post_id, '_property_status', $property_status);
         }
+    }
+
+    /**
+     * Add property details metabox
+     */
+    public function add_property_details_metabox() {
+        add_meta_box(
+            'property_details',
+            __('Property Details', 'herohub-crm'),
+            array($this, 'render_property_details_box'),
+            'property',
+            'advanced',
+            'high'
+        );
+    }
+
+    /**
+     * Render property details metabox
+     */
+    public function render_property_details_box($post) {
+        // Retrieve existing meta values
+        $bedrooms = get_post_meta($post->ID, '_bedrooms', true);
+        $bathrooms = get_post_meta($post->ID, '_bathrooms', true);
+        $property_size = get_post_meta($post->ID, '_property_size', true);
+        $property_status = get_post_meta($post->ID, '_property_status', true);
+        $property_description = get_post_meta($post->ID, '_property_description', true);
+        $property_price = get_post_meta($post->ID, '_price', true);
+        $feature_1 = get_post_meta($post->ID, '_feature_1', true);
+        $feature_2 = get_post_meta($post->ID, '_feature_2', true);
+        $feature_3 = get_post_meta($post->ID, '_feature_3', true);
+
+        wp_nonce_field('property_details_nonce', 'property_details_nonce');
+        ?>
+        <div class="herohub-property-details-container">
+            <!-- Row 1: Unit and Area -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="unit"><?php esc_html_e('Unit/Flat', 'herohub-crm'); ?></label>
+                    <input type="text" id="unit" name="unit" value="<?php echo esc_attr(get_post_meta($post->ID, '_unit', true)); ?>" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="area"><?php esc_html_e('Area', 'herohub-crm'); ?></label>
+                    <select id="area" name="area" class="select2-field widefat">
+                        <option value=""><?php esc_html_e('Select Area', 'herohub-crm'); ?></option>
+                        <?php 
+                        $locations = get_terms(array(
+                            'taxonomy' => 'location', 
+                            'hide_empty' => false
+                        ));
+                        foreach ($locations as $loc) : ?>
+                            <option value="<?php echo esc_attr($loc->term_id); ?>" <?php selected(get_post_meta($post->ID, '_area', true), $loc->term_id); ?>>
+                                <?php echo esc_html($loc->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 2: City and Property Type -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city"><?php esc_html_e('City', 'herohub-crm'); ?></label>
+                    <select id="city" name="city" class="select2-field widefat">
+                        <option value=""><?php esc_html_e('Select City', 'herohub-crm'); ?></option>
+                        <option value="dubai" <?php selected(get_post_meta($post->ID, '_city', true), 'dubai'); ?>><?php esc_html_e('Dubai', 'herohub-crm'); ?></option>
+                        <option value="abu_dhabi" <?php selected(get_post_meta($post->ID, '_city', true), 'abu_dhabi'); ?>><?php esc_html_e('Abu Dhabi', 'herohub-crm'); ?></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="property_type"><?php esc_html_e('Property Type', 'herohub-crm'); ?></label>
+                    <?php 
+                    $property_types = get_terms(array(
+                        'taxonomy' => 'property_type', 
+                        'hide_empty' => false
+                    ));
+                    $selected_type = get_post_meta($post->ID, '_property_type', true);
+                    ?>
+                    <select id="property_type" name="property_type" class="select2-field widefat">
+                        <option value=""><?php esc_html_e('Select Property Type', 'herohub-crm'); ?></option>
+                        <?php foreach ($property_types as $type) : ?>
+                            <option value="<?php echo esc_attr($type->term_id); ?>" <?php selected($selected_type, $type->term_id); ?>>
+                                <?php echo esc_html($type->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 3: Bedrooms, Bathrooms, Size, Status, Price -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bedrooms"><?php esc_html_e('Bedrooms', 'herohub-crm'); ?></label>
+                    <input type="number" id="bedrooms" name="bedrooms" value="<?php echo esc_attr($bedrooms); ?>" min="0" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="bathrooms"><?php esc_html_e('Bathrooms', 'herohub-crm'); ?></label>
+                    <input type="number" id="bathrooms" name="bathrooms" value="<?php echo esc_attr($bathrooms); ?>" min="0" step="0.5" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="property_size"><?php esc_html_e('Size (sq.ft.)', 'herohub-crm'); ?></label>
+                    <input type="number" id="property_size" name="property_size" value="<?php echo esc_attr($property_size); ?>" min="0" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="property_status"><?php esc_html_e('Property Status', 'herohub-crm'); ?></label>
+                    <select id="property_status" name="property_status" class="select2-field widefat">
+                        <option value=""><?php esc_html_e('Select Status', 'herohub-crm'); ?></option>
+                        <option value="for_sale" <?php selected($property_status, 'for_sale'); ?>><?php esc_html_e('For Sale', 'herohub-crm'); ?></option>
+                        <option value="for_rent" <?php selected($property_status, 'for_rent'); ?>><?php esc_html_e('For Rent', 'herohub-crm'); ?></option>
+                        <option value="off_plan" <?php selected($property_status, 'off_plan'); ?>><?php esc_html_e('Off-Plan', 'herohub-crm'); ?></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="price"><?php esc_html_e('Price (AED)', 'herohub-crm'); ?></label>
+                    <input type="number" id="price" name="price" value="<?php echo esc_attr($property_price); ?>" min="0" class="widefat">
+                </div>
+            </div>
+
+            <!-- Row 4: Features -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="feature_1"><?php esc_html_e('Feature 1', 'herohub-crm'); ?></label>
+                    <input type="text" id="feature_1" name="feature_1" value="<?php echo esc_attr($feature_1); ?>" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="feature_2"><?php esc_html_e('Feature 2', 'herohub-crm'); ?></label>
+                    <input type="text" id="feature_2" name="feature_2" value="<?php echo esc_attr($feature_2); ?>" class="widefat">
+                </div>
+                <div class="form-group">
+                    <label for="feature_3"><?php esc_html_e('Feature 3', 'herohub-crm'); ?></label>
+                    <input type="text" id="feature_3" name="feature_3" value="<?php echo esc_attr($feature_3); ?>" class="widefat">
+                </div>
+            </div>
+
+            <!-- New Row: Property Description -->
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="property_description"><?php esc_html_e('Property Description', 'herohub-crm'); ?></label>
+                    <textarea id="property_description" name="property_description" rows="5" class="widefat"><?php echo esc_textarea($property_description); ?></textarea>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            $('.select2-field').select2();
+        });
+        </script>
+        <?php
+    }
+
+    /**
+     * Enqueue scripts for gallery functionality
+     */
+    public function enqueue_gallery_scripts($hook) {
+        // Only load on property edit screen
+        if (get_post_type() !== 'property' && $hook !== 'post.php' && $hook !== 'post-new.php') {
+            return;
+        }
+
+        // Enqueue WordPress media uploader
+        wp_enqueue_media();
+
+        // Enqueue jQuery UI Sortable for drag and drop
+        wp_enqueue_script('jquery-ui-sortable');
+
+        // Enqueue custom gallery script
+        wp_enqueue_script(
+            'herohub-property-gallery', 
+            plugin_dir_url(__FILE__) . '../../assets/js/property-gallery.js', 
+            array('jquery', 'jquery-ui-sortable'), 
+            '1.0.0', 
+            true
+        );
+
+        // Enqueue gallery styles
+        wp_enqueue_style(
+            'herohub-property-gallery', 
+            plugin_dir_url(__FILE__) . '../../assets/css/property-gallery.css', 
+            array(), 
+            '1.0.0'
+        );
+    }
+
+    /**
+     * Add property gallery metabox
+     */
+    public function add_property_gallery_metabox() {
+        add_meta_box(
+            'property_gallery_metabox',
+            __('Property Gallery', 'herohub-crm'),
+            array($this, 'render_property_gallery_metabox'),
+            'property',
+            'normal',
+            'high'
+        );
+    }
+
+    /**
+     * Render property gallery metabox
+     */
+    public function render_property_gallery_metabox($post) {
+        // Retrieve existing gallery images
+        $gallery_images = get_post_meta($post->ID, '_property_gallery_images', true);
+        $gallery_images = $gallery_images ? explode(',', $gallery_images) : array();
+        
+        wp_nonce_field('property_gallery_nonce', 'property_gallery_nonce');
+        ?>
+        <div id="herohub-property-gallery-container">
+            <div id="herohub-gallery-upload-button-container">
+                <button type="button" id="herohub-gallery-upload-button" class="button button-primary">
+                    <?php esc_html_e('Add Gallery Images', 'herohub-crm'); ?>
+                </button>
+            </div>
+            
+            <ul id="herohub-gallery-images-list" class="herohub-gallery-images">
+                <?php 
+                foreach ($gallery_images as $image_id) : 
+                    $image = wp_get_attachment_image_src($image_id, 'thumbnail');
+                    if ($image) :
+                ?>
+                    <li class="herohub-gallery-image" data-image-id="<?php echo esc_attr($image_id); ?>">
+                        <input type="hidden" name="property_gallery_images[]" value="<?php echo esc_attr($image_id); ?>">
+                        <img src="<?php echo esc_url($image[0]); ?>" alt="">
+                        <a href="#" class="herohub-remove-gallery-image">&times;</a>
+                    </li>
+                <?php 
+                    endif; 
+                endforeach; 
+                ?>
+            </ul>
+        </div>
+        <?php
+    }
+
+    /**
+     * Save property gallery images
+     */
+    public function save_property_gallery($post_id) {
+        // Check nonce
+        if (!isset($_POST['property_gallery_nonce']) || 
+            !wp_verify_nonce($_POST['property_gallery_nonce'], 'property_gallery_nonce')) {
+            return;
+        }
+
+        // Check autosave
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        // Check permissions
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        // Save gallery images
+        if (isset($_POST['property_gallery_images'])) {
+            $gallery_images = array_map('intval', $_POST['property_gallery_images']);
+            $gallery_images_string = implode(',', $gallery_images);
+            update_post_meta($post_id, '_property_gallery_images', $gallery_images_string);
+        } else {
+            delete_post_meta($post_id, '_property_gallery_images');
+        }
+    }
+
+    /**
+     * Remove default editor for property post type
+     */
+    public function remove_default_editor() {
+        remove_post_type_support('property', 'editor');
     }
 }
